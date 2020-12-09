@@ -1,5 +1,13 @@
-import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  OneToOne,
+  JoinColumn,
+  BeforeInsert,
+} from "typeorm";
 import { Keg } from "./Keg";
+import { v4 as uuidv4 } from "uuid";
 
 @Entity()
 export class KegNotification {
@@ -7,7 +15,7 @@ export class KegNotification {
   id!: string;
 
   @OneToOne(() => Keg)
-  @JoinColumn({ name: "id" })
+  @JoinColumn({ name: "kegId" })
   @Column()
   kegId!: string;
 
@@ -28,4 +36,11 @@ export class KegNotification {
     default: (): string => "now()",
   })
   date?: Date;
+
+  @BeforeInsert()
+  public updateId() {
+    if (!this.id) {
+      this.id = uuidv4();
+    }
+  }
 }

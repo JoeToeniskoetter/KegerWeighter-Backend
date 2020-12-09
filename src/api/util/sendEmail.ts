@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-export async function sendEmail() {
+export async function sendEmail(email: string, token: string) {
   let url = "https://api.sendinblue.com/v3/smtp/email";
 
   const body = JSON.stringify({
@@ -8,13 +8,13 @@ export async function sendEmail() {
       name: "KegerWeighter",
       email: "info@thekegerweighter.com",
     },
-    to: [{ email: "josephtoeniskoetter@gmail.com" }],
+    to: [{ email }],
     replyTo: {
       email: "info@thekegerweighter.com",
       name: "KegerWeighter",
     },
     subject: "Password Reset Request",
-    textContent: "test",
+    textContent: `Here is your temporary password ${token}`,
   });
 
   let options = {

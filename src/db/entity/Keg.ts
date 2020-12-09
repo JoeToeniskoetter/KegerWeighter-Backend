@@ -30,6 +30,9 @@ export class Keg {
   @Column()
   location!: string;
 
+  @Column({default:false})
+  subscribed!: boolean;
+
   @ManyToOne(() => User)
   @JoinColumn({ name: "userId" })
   @Column({ nullable: true })

@@ -9,7 +9,7 @@ export const connection = async () =>
     password: "",
     database: "test",
     entities: [__dirname + "/entity/*.ts"],
-    synchronize: false,
+    synchronize: true,
     dropSchema: false,
-    logging: false,
+    logging: true,
   });

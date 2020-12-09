@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
-import { User } from "../../../db/entity/User";
+import * as jwt from "jsonwebtoken";
+import { User } from "../../db/entity/User";
 require("dotenv").config();
 
 type AuthTokens = {

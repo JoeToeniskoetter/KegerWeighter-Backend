@@ -11,5 +11,5 @@ export const connection = async () =>
     entities: [__dirname + "/entity/*.ts"],
     synchronize: true,
     dropSchema: false,
-    logging: true,
+    logging: false,
   });

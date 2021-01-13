@@ -18,6 +18,9 @@ export class Keg {
   @PrimaryColumn()
   id!: string;
 
+  @Column({ nullable: false })
+  password!: string;
+
   @Column()
   beerType!: string;
 
@@ -30,7 +33,7 @@ export class Keg {
   @Column()
   location!: string;
 
-  @Column({default:false})
+  @Column({ default: false })
   subscribed!: boolean;
 
   @ManyToOne(() => User)

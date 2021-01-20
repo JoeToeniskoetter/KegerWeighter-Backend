@@ -2,12 +2,9 @@ import { createConnection } from "typeorm";
 
 export const connection = async () =>
   await createConnection({
+    url:
+      process.env.DATABASE_URL || "postgresql://postgres:@localhost:5432/test",
     type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "",
-    database: "test",
     entities: [__dirname + "/entity/*.ts"],
     synchronize: true,
     dropSchema: false,

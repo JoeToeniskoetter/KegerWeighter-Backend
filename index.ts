@@ -22,7 +22,7 @@ connection().then(() => {
   const server: Server = new Server(api.app);
   const socketServer = new SocketServer(server);
 
-  server.listen(3000, () => {
+  server.listen(process.env.PORT || 3000, () => {
     console.log("listening");
   });
 });

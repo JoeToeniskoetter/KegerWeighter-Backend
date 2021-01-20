@@ -16,8 +16,17 @@ import AuthController from "./src/api/controllers/auth/AuthController";
 import KegController from "./src/api/controllers/keg/KegController";
 import { connection } from "./src/db/db";
 import { Server } from "http";
+import * as admin from "firebase-admin";
+require("dotenv").config;
 
 connection().then(() => {
+  admin.initializeApp({
+    credential: admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_KEY || "{}")
+    ),
+    databaseURL: "https://kegerweighter.firebaseio.com",
+  });
+
   const api = new App([new AuthController(), new KegController()]);
   const server: Server = new Server(api.app);
   const socketServer = new SocketServer(server);

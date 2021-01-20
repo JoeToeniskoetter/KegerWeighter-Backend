@@ -7,6 +7,7 @@ import KegNotFoundException from "../../api/exceptions/KegNotFoundException";
 import UpdateKegDto from "api/controllers/keg/dto/updateKeg.dto";
 import KegNotificationService from "./KegNotificationService";
 import { kegSizeInfo, KegUpdate } from "../../shared/types";
+import { queries } from "./queries";
 
 export default class KegDataService {
   private kegRepo: Repository<Keg> = getRepository(Keg);
@@ -176,16 +177,8 @@ export default class KegDataService {
     };
 
     const dailyData: DailyBeers = await this.kegDataRepo.query(
-      `select CAST("createdAt" as DATE), SUM("beersDrank") as beersDrank from "public".keg_data 
-      JOIN "public".keg ON "public".keg_data."kegId" = "public".keg.id
-        AND keg."userId" = $1
-      WHERE
-      "kegId" = $2
-      and "createdAt" BETWEEN now() - INTERVAL '1w' and now()
-      GROUP BY CAST("createdAt" as DATE)
-      ORDER BY CAST("createdAt" as DATE) DESC
-      `,
-      [userId, kegId]
+      queries.dailyDataQuery,
+      [kegId, userId]
     );
     const dailyBeers = await this.kegDataRepo.query(
       `select SUM("beersDrank") as beersDrank from "public".keg_data 
@@ -201,19 +194,7 @@ export default class KegDataService {
   }
   async getWeeklyBeersDrank(kegId: string, userId: string) {
     const weeklyData = await this.kegDataRepo.query(
-      `
-    select to_char(date_trunc('week', "createdAt")::date, 'mm/dd') || '-' ||
-       to_char((date_trunc('week', "createdAt") + '6 days') ::date, 'mm/dd') as Week,
-       sum(keg_data."beersDrank") beersdrank
-from "public".keg_data
-JOIN "public".keg ON "public".keg_data."kegId" = "public".keg.id
-        AND keg."userId" = $1
-    WHERE
-      "kegId" = $2
-and "createdAt" BETWEEN now() - INTERVAL '5w' and now()
-group by date_trunc('week', "createdAt")
-order by date_trunc('week', "createdAt")
-    `,
+     queries.weeklyDataQuery,
       [userId, kegId]
     );
 
@@ -233,21 +214,7 @@ order by date_trunc('week', "createdAt")
 
   async getMonthlyData(kegId: string, userId: string) {
     const monthlyData = await this.kegDataRepo.query(
-      `SELECT
-      date_part('month', "createdAt") AS month,
-      SUM("beersDrank") AS beersDrank
-    FROM
-      "public".keg_data
-      JOIN "public".keg ON "public".keg_data."kegId" = "public".keg.id
-        AND keg."userId" = $1
-    WHERE
-      "kegId" = $2
-      AND "createdAt" BETWEEN now() - INTERVAL '5month'
-      AND now()
-    GROUP BY
-      date_part('month', "createdAt")
-      ORDER BY date_part('month', "createdAt") DESC
-      `,
+      queries.monthlyDataQuery,
       [userId, kegId]
     );
 

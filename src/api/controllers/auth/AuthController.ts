@@ -6,7 +6,7 @@ import Controller from "../BaseController";
 import validationMiddleware from "../../middlewares/validationMiddleware";
 import CreateUserDto from "./dto/user.dto";
 import AuthService from "../../services/AuthService";
-import { rejects } from "assert";
+import { checkTokens } from "../../../api/middlewares/checkTokens";
 
 class AuthController implements Controller {
   public path = "/api/auth";
@@ -27,6 +27,7 @@ class AuthController implements Controller {
     );
     this.router.post(this.path.concat("/resetpassword"), this.resetPassword);
     this.router.post(this.path.concat("/newpassword"), this.newPassword);
+    this.router.post(this.path.concat("/fcmToken"), checkTokens, this.fcmToken);
   }
 
   public register = async (req: Request, res: Response, next: NextFunction) => {
@@ -63,6 +64,22 @@ class AuthController implements Controller {
       res.json({ message: "ok" });
     } catch (e) {
       next(e);
+    }
+  };
+
+  public fcmToken = async (req: any, res: Response, next: NextFunction) => {
+    if (!req.body.fcmToken) {
+      return next(new InvalidCredentialsException());
+    }
+    try {
+      const result = await this.authService.insertFcmToken(
+        req.user.id,
+        req.body.fcmToken
+      );
+      console.log(result);
+      res.json({ message: "ok" });
+    } catch (e) {
+      return res.json({ message: "ok" });
     }
   };
 

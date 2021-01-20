@@ -13,6 +13,7 @@ import { hash, compare } from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
 import { Keg } from "./Keg";
+import { UserTokens } from "./UserTokens";
 
 @Entity()
 @Unique(["email"])
@@ -63,4 +64,7 @@ export class User {
 
   @OneToMany(() => Keg, (kegs) => kegs.id)
   kegs!: Keg[];
+
+  @OneToMany(() => UserTokens, (device) => device.userId)
+  fcmTokens!: UserTokens[];
 }

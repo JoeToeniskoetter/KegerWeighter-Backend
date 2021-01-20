@@ -6,6 +6,7 @@ import EmailInUseException from "../exceptions/EmailInUseException";
 import InvalidCredentialsException from "../exceptions/InvalidCredentialsException";
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../../api/util/sendEmail";
+import { UserTokens } from "../../db/entity/UserTokens";
 require("dotenv").config();
 
 type AuthTokens = {
@@ -15,6 +16,7 @@ type AuthTokens = {
 
 class AuthService {
   private userRepo: Repository<User> = getRepository(User);
+  private userDeviceRepo: Repository<UserTokens> = getRepository(UserTokens);
 
   constructor() {}
 
@@ -80,6 +82,13 @@ class AuthService {
     record.passwordResetToken = null;
     record.passwordResetTokenExp = null;
     this.userRepo.save(record);
+  }
+
+  public async insertFcmToken(userId: string, fcmToken: string) {
+    const newUserDevice: UserTokens = new UserTokens();
+    newUserDevice.fcmToken = fcmToken;
+    newUserDevice.userId = userId;
+    return await this.userDeviceRepo.save(newUserDevice);
   }
 
   createTokens(user: User): AuthTokens {

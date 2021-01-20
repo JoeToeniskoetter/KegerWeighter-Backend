@@ -17,7 +17,7 @@ export async function checkKegToken(socket: any, next: any) {
   if (foundKeg) {
     // return next(new Error("Unauthorized"));
     if (password === foundKeg.password) {
-      console.log("correct password")
+      console.log("correct password");
       socket.keg = foundKeg;
       return next();
     } else {

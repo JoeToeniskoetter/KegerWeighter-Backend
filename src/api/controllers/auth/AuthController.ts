@@ -27,7 +27,16 @@ class AuthController implements Controller {
     );
     this.router.post(this.path.concat("/resetpassword"), this.resetPassword);
     this.router.post(this.path.concat("/newpassword"), this.newPassword);
-    this.router.post(this.path.concat("/fcmToken"), checkTokens, this.fcmToken);
+    this.router.post(
+      this.path.concat("/subscribe"),
+      checkTokens,
+      this.subscribe
+    );
+    this.router.post(
+      this.path.concat("/unsubscribe"),
+      checkTokens,
+      this.unsubscribe
+    );
   }
 
   public register = async (req: Request, res: Response, next: NextFunction) => {
@@ -67,19 +76,37 @@ class AuthController implements Controller {
     }
   };
 
-  public fcmToken = async (req: any, res: Response, next: NextFunction) => {
+  public subscribe = async (req: any, res: Response, next: NextFunction) => {
+    console.log(req.user);
+
     if (!req.body.fcmToken) {
       return next(new InvalidCredentialsException());
     }
+
     try {
-      const result = await this.authService.insertFcmToken(
-        req.user.id,
-        req.body.fcmToken
+      const result = await this.authService.subscribeToTopics(
+        req.body.fcmToken,
+        req.user.id
       );
-      console.log(result);
       res.json({ message: "ok" });
     } catch (e) {
       return res.json({ message: "ok" });
+    }
+  };
+
+  public unsubscribe = async (req: any, res: Response, next: NextFunction) => {
+    if (!req.body.fcmToken) {
+      return next(new InvalidCredentialsException());
+    }
+
+    try {
+      const result = await this.authService.unSubscribeToTopics(
+        req.body.fcmToken
+      );
+      return res.json({ message: "ok" });
+    } catch (e) {
+      console.log("e");
+      return next(e);
     }
   };
 

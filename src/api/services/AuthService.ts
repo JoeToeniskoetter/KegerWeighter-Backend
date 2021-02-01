@@ -5,8 +5,12 @@ import CreateUserDto from "../controllers/auth/dto/user.dto";
 import EmailInUseException from "../exceptions/EmailInUseException";
 import InvalidCredentialsException from "../exceptions/InvalidCredentialsException";
 import { v4 as uuidv4 } from "uuid";
+import * as admin from "firebase-admin";
 import { sendEmail } from "../../api/util/sendEmail";
 import { UserTokens } from "../../db/entity/UserTokens";
+import { Keg } from "../../db/entity/Keg";
+import { messaging } from "firebase-admin";
+import fetch from "node-fetch";
 require("dotenv").config();
 
 type AuthTokens = {
@@ -16,7 +20,7 @@ type AuthTokens = {
 
 class AuthService {
   private userRepo: Repository<User> = getRepository(User);
-  private userDeviceRepo: Repository<UserTokens> = getRepository(UserTokens);
+  private kegRepo: Repository<Keg> = getRepository(Keg);
 
   constructor() {}
 
@@ -84,11 +88,44 @@ class AuthService {
     this.userRepo.save(record);
   }
 
-  public async insertFcmToken(userId: string, fcmToken: string) {
-    const newUserDevice: UserTokens = new UserTokens();
-    newUserDevice.fcmToken = fcmToken;
-    newUserDevice.userId = userId;
-    return await this.userDeviceRepo.save(newUserDevice);
+  public async subscribeToTopics(fcmToken: string, userId: string) {
+    const kegsToSubscribe = await this.kegRepo.find({ where: { userId } });
+
+    kegsToSubscribe.forEach(async (keg) => {
+      if (keg.subscribed) {
+        await messaging().subscribeToTopic(fcmToken, keg.id);
+      }
+    });
+  }
+
+  public async unSubscribeToTopics(fcmToken: string) {
+    console.log(process.env.SERVER_KEY);
+
+    //     https://iid.googleapis.com/iid/info/e7I6KSEbyUfeupfmiEa0eF:APA91bHEM0WWRPpUp87KUnhIxqdKc5ChEpQtFdLG5M-xSgvir61VNQreWKe5zFjlFpydrau_abYMnc0bi606JYptK6oQbby7UxrpcuiLLAbQI_Bqdm4KMZ9SK3gmLDox-fdL-0cO0TiE?details=true' \
+    // --header 'Authorization: Bearer AAAAXV5N8sM:APA91bGa6C_7bgKgVQhD7OPZ4b0VmvRPh86J1r9cT9Iqyusm4h1uU5cWYv_whWlUV9pbB_y1jvMoZ6xvHE01u-UHx2tmLtryAplF0xMh_jhhJYtjiseC9cw55ztIDXc9ibcRyekSgq2f'
+
+    const result = await fetch(
+      `https://iid.googleapis.com/iid/info/${fcmToken}?details=true`,
+      {
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${process.env.SERVER_KEY}`,
+        },
+      }
+    );
+    if (result.ok) {
+      const json = await result.json();
+      if (json.rel && json.rel.topics) {
+        const topics: string[] = Object.keys(json.rel.topics);
+        topics.forEach(
+          async (topic) =>
+            await messaging().unsubscribeFromTopic(fcmToken, topic)
+        );
+      }
+    } else {
+      console.log(result);
+      throw new Error("An error occured");
+    }
   }
 
   createTokens(user: User): AuthTokens {

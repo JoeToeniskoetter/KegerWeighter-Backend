@@ -49,16 +49,18 @@ day DESC
 LIMIT 5`,
 
   monthlyDataQuery: `
-SELECT
-	Y.month_of_year as month, COALESCE(sum, 0) as beersdrank
-FROM (
 	SELECT
-		date_part('month', t.month) AS month_of_year
+	Y.month_of_year as month, Y.year_of_month as year, COALESCE(sum, 0) as beersdrank
+FROM (
+	SELECT 
+ 		date_part('month', t) AS month_of_year,
+ 		date_part('year', t) AS year_of_month
 			FROM
-		generate_series(date_trunc('year', CURRENT_DATE), date_trunc('year', CURRENT_DATE + INTERVAL '1yr'), interval '1month') AS t (month)) Y
+		generate_series(CURRENT_DATE - INTERVAL '1yr', CURRENT_DATE, interval '1month') AS t) Y
 	FULL JOIN (
 		SELECT
 			date_part('month', "createdAt") AS month_of_year,
+			date_part('year', "createdAt") AS year_of_month,
 			sum("beersDrank")
 		FROM
 			"public".keg_data
@@ -67,10 +69,12 @@ FROM (
 		WHERE
 			"kegId" = $2
 		GROUP BY
-			date_part('month', "createdAt")) Z ON Y.month_of_year = Z.month_of_year
-WHERE
-	Y.month_of_year <= date_part('month', CURRENT_DATE)
+			date_part('month', "createdAt"),
+			date_part('year', "createdAt")
+			) Z ON Y.month_of_year = Z.month_of_year 
+			AND Y.year_of_month = Z.year_of_month
 ORDER BY
+	Y.year_of_month DESC,
 	Y.month_of_year DESC
 limit 5;
 `,

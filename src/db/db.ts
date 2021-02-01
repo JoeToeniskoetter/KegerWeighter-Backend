@@ -1,4 +1,5 @@
 import { createConnection } from "typeorm";
+import "reflect-metadata";
 
 export const connection = async () =>
   await createConnection({

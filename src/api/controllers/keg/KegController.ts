@@ -9,17 +9,20 @@ import validationMiddleware from "../../middlewares/validationMiddleware";
 import KegDataService from "../../../api/services/KegDataService";
 import { checkTokens } from "../../middlewares/checkTokens";
 import UpdateKegDto from "./dto/updateKeg.dto";
+import KegNotificationService from "../../../api/services/KegNotificationService";
 
 class KegController implements Controller {
   public path: string = "/api/kegs";
   public router: Router = Router();
   private kegDataService = new KegDataService();
+  private kegNofiticationService = new KegNotificationService();
 
   constructor() {
     this.initializeRoutes();
   }
 
   initializeRoutes() {
+    // this.router.post(this.path.concat("/notify"), this.testNotifications);
     this.router.post(
       this.path.concat("/:id"),
       checkTokens,
@@ -73,6 +76,14 @@ class KegController implements Controller {
     }
   };
 
+  public testNotifications = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+  ) => {
+    await this.kegNofiticationService.sendNotifications(req.body.kegId);
+    res.json({ message: "ok" });
+  };
   public getKegSummary = async (
     req: any,
     res: Response,

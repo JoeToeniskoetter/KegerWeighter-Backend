@@ -4,11 +4,13 @@ import { KegNotification } from "../../db/entity/KegNotification";
 import { Keg } from "../../db/entity/Keg";
 import * as admin from "firebase-admin";
 import { UserTokens } from "../../db/entity/UserTokens";
+import { KegData } from "../../db/entity/KegData";
 require("dotenv").config();
 
 class KegNotificationService {
   private kegNotificationRepo = getRepository(KegNotification);
   private kegRepo = getRepository(Keg);
+  private kegDataRepo = getRepository(KegData);
   private userDeviceRepo = getRepository(UserTokens);
   private messaging = admin.messaging();
 
@@ -48,48 +50,52 @@ class KegNotificationService {
   }
 
   async sendNotifications(kegId: string) {
-    const keg = await this.kegRepo.findOne({ where: { id: kegId } });
+    const keg = await this.kegRepo.findOne({
+      where: { id: kegId },
+    });
+
     if (!keg) {
       return;
     }
-    const userId = keg.userId;
-    const deviceTokens = await this.userDeviceRepo.find({ where: { userId } });
+    const data = await this.kegDataRepo.findOne({
+      where: { kegId: keg.id },
+      order: { date: "DESC" },
+    });
+    const messageData = {
+      ...keg,
+      data,
+    };
 
-    if (deviceTokens.length < 1) {
-      return;
-    }
-
+    console.log(messageData);
     const body = `Your ${keg.kegSize} of ${keg.beerType} is low!`;
-    const title = "Your keg is low!";
-    const messages: admin.messaging.Message[] = deviceTokens.map(
-      (device: UserTokens) => ({
-        token: device.fcmToken,
+    const title = "Oh no, Your keg is low!";
+    const message: admin.messaging.Message = {
+      topic: kegId,
+      notification: {
+        title,
+        body,
+      },
+      android: {
         notification: {
-          title,
-          body,
+          body: `Your ${keg.kegSize} of ${keg.beerType} is low!`,
         },
-        android: {
-          notification: {
-            body: `Your ${keg.kegSize} of ${keg.beerType} is low!`,
-          },
-          priority: "high",
-        },
-        data: {
-          keg: keg.id,
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: "default",
-              contentAvailable: true,
-              alert: { body, title },
-            },
+        priority: "high",
+      },
+      data: {
+        keg: JSON.stringify(messageData),
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: "default",
+            contentAvailable: true,
+            alert: { body, title },
           },
         },
-      })
-    );
+      },
+    };
 
-    return await this.messaging.sendAll(messages);
+    return await this.messaging.send(message);
   }
 }
 

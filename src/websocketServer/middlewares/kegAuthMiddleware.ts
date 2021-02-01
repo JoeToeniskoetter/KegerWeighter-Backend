@@ -2,8 +2,6 @@ import { Keg } from "../../db/entity/Keg";
 import { getConnection } from "typeorm";
 
 export async function checkKegToken(socket: any, next: any) {
-  console.log(socket.handshake.query);
-
   if (!socket.handshake.query["x-keg-token"]) {
     return next();
   }
@@ -17,7 +15,6 @@ export async function checkKegToken(socket: any, next: any) {
   if (foundKeg) {
     // return next(new Error("Unauthorized"));
     if (password === foundKeg.password) {
-      console.log("correct password");
       socket.keg = foundKeg;
       return next();
     } else {

@@ -24,11 +24,7 @@ export class SocketServer {
   }
 
   public onUserConnect = async (socket: any) => {
-    console.log("user connected");
-    console.log(socket.user.id);
     await socket.join(socket.user.id);
-    console.log(socket.nsp)
-    console.log("ROOMS: ", socket.rooms);
     socket.on("connect_error", (err: any) => console.log(err));
     socket.on("connect_failed", (err: any) => console.log(err));
   };
@@ -55,20 +51,26 @@ export class SocketServer {
   public onKegUpdate = (socket: any) => {
     socket.on(KegEvents.UPDATE, async (data: KegUpdate) => {
       let kegId = socket.keg.id;
-      const newData = await this.kegDataService.insertNewKegData({
-        id: kegId,
-        weight: data.weight,
-        temp: data.temp,
-      });
-
-      if (!newData) {
+      if (!data.weight && !data.temp) {
         return;
       }
-      console.log(socket.keg.userId);
-      return this.io
-        .of("/user/feed")
-        .to(socket.keg.userId)
-        .emit(`${KegEvents.UPDATE}.${socket.keg.id}`, newData);
+      try {
+        const newData = await this.kegDataService.insertNewKegData({
+          id: kegId,
+          weight: Math.round(Number(data.weight)),
+          temp: Math.round(Number(data.temp)),
+        });
+
+        if (!newData) {
+          return;
+        }
+        return this.io
+          .of("/user/feed")
+          .to(socket.keg.userId)
+          .emit(`${KegEvents.UPDATE}.${socket.keg.id}`, newData);
+      } catch (e) {
+        console.log(e);
+      }
     });
   };
   onKegDisconnnect(socket: any) {

@@ -8,7 +8,6 @@ export async function checkSocketTokens(socket: any, next: any) {
       let decodeduser: any = jwt.decode(token);
       socket.user = decodeduser.user;
       await socket.join(decodeduser.id);
-      console.log("SOCKET USER: ", socket.user);
       return next();
     } catch (e) {
       return next(new Error(e));

@@ -56,7 +56,7 @@ export default class KegDataService {
 
     foundKeg.kegSize = kegData.kegSize || foundKeg.kegSize;
     foundKeg.location = kegData.location || foundKeg.location;
-    foundKeg.subscribed = kegData.subscribed || foundKeg.subscribed;
+    foundKeg.subscribed = kegData.subscribed;
     foundKeg.beerType = kegData.beerType || foundKeg.beerType;
 
     const updatedKeg = await this.kegRepo.save(foundKeg);
@@ -66,7 +66,9 @@ export default class KegDataService {
     if (!foundKegNotif) {
       throw new KegNotFoundException(foundKeg.id);
     }
-    foundKegNotif.firstPerc = kegData.firstNotif || foundKegNotif.firstPerc;
+
+    if (!updatedKeg.subscribed)
+      foundKegNotif.firstPerc = kegData.firstNotif || foundKegNotif.firstPerc;
     foundKegNotif.secondPerc = kegData.secondNotif || foundKegNotif.secondPerc;
     const updateKegNotif = await this.kegNotificationRepo.save(foundKegNotif);
     return {
@@ -193,10 +195,10 @@ export default class KegDataService {
     return { dailyBeers: dailyBeers[0], dailyData };
   }
   async getWeeklyBeersDrank(kegId: string, userId: string) {
-    const weeklyData = await this.kegDataRepo.query(
-     queries.weeklyDataQuery,
-      [userId, kegId]
-    );
+    const weeklyData = await this.kegDataRepo.query(queries.weeklyDataQuery, [
+      userId,
+      kegId,
+    ]);
 
     const weeklyBeers = await this.kegDataRepo.query(
       `select SUM("beersDrank") as beersDrank from 
@@ -213,10 +215,10 @@ export default class KegDataService {
   }
 
   async getMonthlyData(kegId: string, userId: string) {
-    const monthlyData = await this.kegDataRepo.query(
-      queries.monthlyDataQuery,
-      [userId, kegId]
-    );
+    const monthlyData = await this.kegDataRepo.query(queries.monthlyDataQuery, [
+      userId,
+      kegId,
+    ]);
 
     const monthlyBeers = await this.kegDataRepo.query(
       `select SUM("beersDrank") as beersDrank from "public".keg_data 

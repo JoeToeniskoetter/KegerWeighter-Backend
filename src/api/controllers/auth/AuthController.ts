@@ -129,12 +129,14 @@ class AuthController implements Controller {
     next: NextFunction
   ) => {
     const email = req.body.email;
+    console.log(req.body);
 
     if (!email) {
       next();
     }
     try {
-      this.authService.resetPassword(email);
+      await this.authService.resetPassword(email);
+      res.json({ message: "ok" });
     } catch (e) {
       next(e);
     }

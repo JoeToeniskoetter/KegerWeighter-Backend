@@ -2,6 +2,7 @@ import { KegData } from "../../db/entity/KegData";
 import * as cron from "node-cron";
 import { getRepository, Repository } from "typeorm";
 import { KegNotification } from "../../db/entity/KegNotification";
+import { User } from "../../db/entity/User";
 
 export class SchedulerService {
   private cron: typeof cron;
@@ -9,6 +10,7 @@ export class SchedulerService {
   private kegNotificationRepo: Repository<KegNotification> = getRepository(
     KegNotification
   );
+  private userRepo: Repository<User> = getRepository(User);
 
   constructor() {
     this.cron = cron;
@@ -19,6 +21,7 @@ export class SchedulerService {
     this.cron.schedule("0 0 * * *", () => {
       this.cleanUpData();
       this.resetNotifications();
+      this.removeOldPasswordTokens();
     });
   }
 
@@ -48,6 +51,22 @@ export class SchedulerService {
           notification
         );
       }
+    });
+  }
+
+  async removeOldPasswordTokens() {
+    const today = new Date();
+    const usersToUpdate = await this.userRepo
+      .createQueryBuilder("user")
+      .where("passwordResetTokenExp < :today", { today })
+      .select()
+      .getMany();
+
+    usersToUpdate.forEach(async (user) => {
+      await this.userRepo.update(
+        { passwordResetTokenExp: null, passwordResetToken: null },
+        user
+      );
     });
   }
 

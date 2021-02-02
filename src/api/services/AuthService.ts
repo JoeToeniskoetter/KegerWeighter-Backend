@@ -64,8 +64,11 @@ class AuthService {
   }
 
   public async resetPassword(email: string) {
-    const foundUser = await this.userRepo.findOne({ where: { email } });
+    const foundUser = await this.userRepo.findOne({
+      where: { email: email.trim().toLowerCase() },
+    });
     if (!foundUser) {
+      console.log("email not found");
       return email;
     }
 

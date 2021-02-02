@@ -58,7 +58,7 @@ export class SchedulerService {
     const today = new Date();
     const usersToUpdate = await this.userRepo
       .createQueryBuilder("user")
-      .where("passwordResetTokenExp < :today", { today })
+      .where('"passwordResetTokenExp" < :today', { today })
       .select()
       .getMany();
 

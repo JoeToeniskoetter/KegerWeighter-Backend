@@ -1,9 +1,8 @@
 import KegNotFoundException from "../exceptions/KegNotFoundException";
-import { getConnection, getRepository } from "typeorm";
+import { getRepository } from "typeorm";
 import { KegNotification } from "../../db/entity/KegNotification";
 import { Keg } from "../../db/entity/Keg";
 import * as admin from "firebase-admin";
-import { UserTokens } from "../../db/entity/UserTokens";
 import { KegData } from "../../db/entity/KegData";
 require("dotenv").config();
 
@@ -11,7 +10,6 @@ class KegNotificationService {
   private kegNotificationRepo = getRepository(KegNotification);
   private kegRepo = getRepository(Keg);
   private kegDataRepo = getRepository(KegData);
-  private userDeviceRepo = getRepository(UserTokens);
   private messaging = admin.messaging();
 
   async checkNotificationsAndSend(kegId: string, percLeft: number) {
@@ -66,9 +64,8 @@ class KegNotificationService {
       data,
     };
 
-    console.log(messageData);
-    const body = `Your ${keg.kegSize} of ${keg.beerType} is low!`;
-    const title = "Oh no, Your keg is low!";
+    const body = `You have ${messageData.data.beersLeft} beers left in your ${messageData.kegSize} of ${messageData.beerType}`;
+    const title = "Your keg is low!";
     const message: admin.messaging.Message = {
       topic: kegId,
       notification: {

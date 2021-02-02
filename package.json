@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node index.ts",
     "test": "jest --watchAll --runInBand",
     "dev": "nodemon --exec ts-node index.ts",
     "client": "ts-node client.ts"

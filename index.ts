@@ -17,6 +17,7 @@ import KegController from "./src/api/controllers/keg/KegController";
 import { connection } from "./src/db/db";
 import { Server } from "http";
 import * as admin from "firebase-admin";
+import { SchedulerService } from "./src/api/services/SchedulerService";
 require("dotenv").config;
 
 connection().then(() => {
@@ -30,6 +31,7 @@ connection().then(() => {
   const api = new App([new AuthController(), new KegController()]);
   const server: Server = new Server(api.app);
   const socketServer = new SocketServer(server);
+  const schedulerService = new SchedulerService();
 
   server.listen(process.env.PORT || 3000, () => {
     console.log("listening");

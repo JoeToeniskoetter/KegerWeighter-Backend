@@ -104,8 +104,7 @@ class AuthService {
   public async unSubscribeToTopics(fcmToken: string) {
     console.log(process.env.SERVER_KEY);
 
-    //     https://iid.googleapis.com/iid/info/e7I6KSEbyUfeupfmiEa0eF:APA91bHEM0WWRPpUp87KUnhIxqdKc5ChEpQtFdLG5M-xSgvir61VNQreWKe5zFjlFpydrau_abYMnc0bi606JYptK6oQbby7UxrpcuiLLAbQI_Bqdm4KMZ9SK3gmLDox-fdL-0cO0TiE?details=true' \
-    // --header 'Authorization: Bearer AAAAXV5N8sM:APA91bGa6C_7bgKgVQhD7OPZ4b0VmvRPh86J1r9cT9Iqyusm4h1uU5cWYv_whWlUV9pbB_y1jvMoZ6xvHE01u-UHx2tmLtryAplF0xMh_jhhJYtjiseC9cw55ztIDXc9ibcRyekSgq2f'
+    //Removed api key and cycled to use new key in firebase
 
     const result = await fetch(
       `https://iid.googleapis.com/iid/info/${fcmToken}?details=true`,

@@ -47,7 +47,7 @@ type KegSizeInfo = {
 
 export const kegSizeInfo: KegSizeInfo = {
   "1/4 Barrel": { beers: 82, tare: 22, full: 87, net_weight: 65 },
-  "1/2 Barrel": { beers: 165, tare: 30, full: 165, net_weight: 135 },
+  "1/2 Barrel": { beers: 165, tare: 31, full: 162, net_weight: 131 },
   "1/6 Barrel": { beers: 55, tare: 16.5, full: 58, net_weight: 41.5 },
   "Cornelious Keg": { beers: 53, tare: 9, full: 55, net_weight: 46 },
   "Pony Keg": { beers: 82, tare: 22, full: 87, net_weight: 65 },

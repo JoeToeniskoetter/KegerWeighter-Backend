@@ -12,9 +12,8 @@ import { queries } from "./queries";
 export default class KegDataService {
   private kegRepo: Repository<Keg> = getRepository(Keg);
   private kegDataRepo: Repository<KegData> = getRepository(KegData);
-  private kegNotificationRepo: Repository<KegNotification> = getRepository(
-    KegNotification
-  );
+  private kegNotificationRepo: Repository<KegNotification> =
+    getRepository(KegNotification);
   private notificationService = new KegNotificationService();
 
   public async getKegs(userId: string) {
@@ -139,10 +138,7 @@ export default class KegDataService {
     if (!latestDataPoint) {
       beersDrank = 0;
     } else {
-      beersDrank =
-        latestDataPoint.beersLeft - beersLeft < 0
-          ? 0
-          : latestDataPoint.beersLeft - beersLeft;
+      beersDrank = latestDataPoint.beersLeft - beersLeft;
     }
 
     const dataPoint = new KegData();

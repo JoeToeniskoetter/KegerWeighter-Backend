@@ -141,6 +141,12 @@ export default class KegDataService {
       beersDrank = latestDataPoint.beersLeft - beersLeft;
     }
 
+    const { beersLeft: prevBeersLeft, beersDrank: prevBeersDrank } =
+      latestDataPoint;
+    if (beersDrank + prevBeersDrank === 0 || beersLeft === prevBeersLeft) {
+      return;
+    }
+
     const dataPoint = new KegData();
     dataPoint.kegId = id;
     dataPoint.kegSize = relatedKeg.kegSize;

@@ -20,7 +20,11 @@ export class App {
 
   config() {
     console.log("running config");
-    this.app.use(cors());
+    this.app.use(
+      cors({
+        exposedHeaders: ["x-auth-token", "x-refresh-token"],
+      })
+    );
     this.app.use(express.json());
     this.app.use(morgan("dev"));
     this.app.use(helmet());
